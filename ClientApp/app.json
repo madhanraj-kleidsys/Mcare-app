@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "MGo",
+    "slug": "MGo",
+    "version": "1.0.0",
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/ic_launcher.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "androidNavigationBar": {
+      "visible": "sticky-immersive",
+      "backgroundColor": "#00000000",
+      "barStyle": "dark-content"
+    },
+    "androidStatusBar": {
+      "hidden": true,
+      "barStyle": "light-content"
+    },
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

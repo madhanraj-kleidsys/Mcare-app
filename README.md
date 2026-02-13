@@ -22,18 +22,6 @@
 
 ---
 
-## ✨ Features
-
-### 🗂 **Task Management**
-- Create, assign, and update tasks
-- Set priorities, deadlines, and categories
-- Track status: **Pending** → **In-Progress** → **Completed**
-
-### 📊 **Real-Time Activity Monitoring**
-- Live user activity tracking
-- Task ,Assignment and Completion timeline visualization
-- Productivity indicators and insights
-
 ### 🔐 **Authentication & Security**
 - JWT-based secure authentication with 2+ tokens Access , Refresh Tokens
 - Session management

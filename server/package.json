@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "bun --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "moment": "^2.30.1",
+    "mssql": "^11.0.1",
+    "sequelize": "^6.37.7"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.6"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
