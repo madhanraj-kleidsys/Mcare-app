@@ -93,7 +93,7 @@ const DockItem = ({ icon, label, isActive, onPress }) => {
   );
 };
 
-const Dock = ({ activeTab, onTabChange }) => {
+const Dock = ({ activeTab, onTabChange, isAdmin }) => {
   const dockSlideAnim = useRef(new Animated.Value(100)).current;
 
   useEffect(() => {
@@ -106,13 +106,17 @@ const Dock = ({ activeTab, onTabChange }) => {
     }).start();
   }, []);
 
-  const dockItems = [
+  const allDockitems = [
     { icon: 'home', label: 'Home', key: 'home' },
     { icon: 'calendar', label: 'Calendar', key: 'calendar' },
     { icon: 'clock-check-outline', label: 'Attendance', key: 'attendance' },
-    { icon: 'eye-outline', label: 'View', key: 'view' },
+    { icon: 'eye-outline', label: 'Attendance View', key: 'view', adminOnly: true },
     { icon: 'account-circle', label: 'Profile', key: 'profile' },
   ];
+
+  const dockItems = allDockitems.filter(item => 
+    !item.adminOnly || (item.adminOnly && isAdmin)
+  );
 
   return (
     <Animated.View 

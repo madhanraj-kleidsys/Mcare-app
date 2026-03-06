@@ -18,7 +18,7 @@ import DashboardSkeleton from '../loader/DashboardSkeleton';
 const BRAND_COLOR = '#ed1a3b';
 const BG_COLOR = '#ffffff4f';
 
-const Dashboard = ({ onNavigate }) => {
+const Dashboard = ({ onNavigate, setAdminStatus }) => {
   const [activeTab, setActiveTab] = useState('home');
   const [loading,setLoading] = useState(true);
   const [rawApiData, setRawApiData] = useState([]);
@@ -29,10 +29,10 @@ const Dashboard = ({ onNavigate }) => {
     claims:[]
   });
 
-  const getVal = (data,key) =>{
-    const item = data?.find(obj => obj.hasOwnProperty(key));
-    return item ? item[key] : '0';
-  }
+  // const getVal = (data,key) =>{
+  //   const item = data?.find(obj => obj.hasOwnProperty(key));
+  //   return item ? item[key] : '0';
+  // }
 
 useEffect(()=>{
   const fetchData = async() =>{
@@ -40,14 +40,27 @@ useEffect(()=>{
       const res = await api.get('/home/dashboard');
       const apiData = res.data;
 
+      const userProfile = apiData.find(item => item.hasOwnProperty('IsAdmin'));
+        
+        if (userProfile && setAdminStatus) {
+           // Ensure it's treated as a boolean (1 or true)
+           const isAdmin = userProfile.IsAdmin === 1 || userProfile.IsAdmin === true;
+           setAdminStatus(isAdmin);
+        }
+
       setRawApiData(apiData);
+
+      const getVal = (data, key) => {
+           const item = data?.find(obj => obj.hasOwnProperty(key));
+           return item ? item[key] : 0; // Default to 0 if not found
+        };
 
   const allData = {
     service: [
      { title: 'Registered', count: getVal(apiData, 'SR_Open'), icon: 'clipboard-text-outline' },
-            { title: 'Assigned', count: getVal(apiData, 'SR_Assigned'), icon: 'account-check' },
-            { title: 'Completed', count: getVal(apiData, 'SR_Completed'), icon: 'check-circle' },
-            { title: 'Closed', count: getVal(apiData, 'SR_Closed'), icon: 'lock' },
+        { title: 'Assigned', count: getVal(apiData, 'SR_Assigned'), icon: 'account-check' },
+        { title: 'Completed', count: getVal(apiData, 'SR_Completed'), icon: 'check-circle' },
+        { title: 'Closed', count: getVal(apiData, 'SR_Closed'), icon: 'lock' },
     ],
     marketing: [
       { title: 'Registered', count: getVal(apiData, 'MC_Open'), icon: 'bullhorn' },
@@ -65,9 +78,9 @@ useEffect(()=>{
       { title: 'Booked', count: getVal(apiData, 'CLM_Booked'), icon: 'file-document-edit' },
       { title: 'Waiting', count: getVal(apiData, 'CLM_Waiting'), icon: 'timer-sand' },
       { title: 'Approved', count: getVal(apiData, 'CLM_Approved'), icon: 'thumb-up' },
-      { title: 'Paid', count: getVal(apiData, 'CLM_Closed'), icon: 'cash-check' },
+      { title: 'Paid', count: getVal(apiData, 'CLM_Closed'), icon: 'cash-check', disabled: true },
     ],
-  };
+    };
      setDashboardData(allData);
     } catch(error){
       console.error("DaSHbOArD DaTa FeTcH eRRoR",error);
@@ -77,7 +90,7 @@ useEffect(()=>{
     }
   };
   fetchData();
-}, []);
+}, [setAdminStatus]);
 
   // const pulseAnim = new Animated.Value(1);
   
@@ -182,30 +195,39 @@ const checkPermission = (data, code) => {
     const showClaims = checkPermission(rawApiData, 'CLM') || checkPermission(rawApiData, 'Claims');
     const showService = checkPermission(rawApiData, 'SR') || checkPermission(rawApiData, 'serv_req');
     const showMarketing = checkPermission(rawApiData, 'MC') || checkPermission(rawApiData, 'mar_call');
-   
+    
+    const handleTitleClick = (sectionType) => {
+  // Toggle between single view and home view
+  setActiveTab(prevTab => prevTab === sectionType ? 'home' : sectionType);
+};
     const handleServiceClick = (status) => { if(onNavigate) onNavigate(status, 'service'); };
     const handleMarketingClick = (status) => { if(onNavigate) onNavigate(status, 'marketing'); };
     const handleTaskClick = (status) => { if(onNavigate) onNavigate(status, 'tasks'); };
     const handleClaimClick = (status) => { if(onNavigate) onNavigate(status, 'claims'); };
 
+
     switch (activeTab) {
       case 'home':
         return (
           <>
-        {showService && ( <UnifiedSection type="service" data={dashboardData.service} onCardClick={handleServiceClick}/>) }
-        {showMarketing && ( <UnifiedSection type="marketing" data={dashboardData.marketing} onCardClick={handleMarketingClick} /> )}
-        {showTasks && ( <UnifiedSection type="tasks" data={dashboardData.tasks} onCardClick={handleTaskClick} /> )}
-        {showClaims && ( <UnifiedSection type="claims" data={dashboardData.claims} onCardClick={handleClaimClick} />) }
+        {(activeTab === 'home' || activeTab === 'service') && (
+          showService && ( <UnifiedSection type="service" data={dashboardData.service} onCardClick={handleServiceClick} onTitleClick={handleTitleClick}/>) ) } 
+        {(activeTab === 'home' || activeTab === 'marketing') && (
+        showMarketing && ( <UnifiedSection type="marketing" data={dashboardData.marketing} onCardClick={handleMarketingClick} onTitleClick={handleTitleClick} /> ))}
+        {(activeTab === 'home' || activeTab === 'tasks') && (
+          showTasks && ( <UnifiedSection type="tasks" data={dashboardData.tasks} onCardClick={handleTaskClick} onTitleClick={handleTitleClick} /> ))}
+        {(activeTab === 'home' || activeTab === 'claims') && (
+          showClaims && ( <UnifiedSection type="claims" data={dashboardData.claims} onCardClick={handleClaimClick} onTitleClick={handleTitleClick} /> )) }
           </>
         );
       case 'service':
-        return <UnifiedSection type="service" data={dashboardData.service} onCardClick={handleServiceClick}/>;
+        return <UnifiedSection type="service" data={dashboardData.service} onCardClick={handleServiceClick} onTitleClick={handleTitleClick} isActive={true}/>;
       case 'marketing':
-        return <UnifiedSection type="marketing" data={dashboardData.marketing} onCardClick={handleMarketingClick} />;
+        return <UnifiedSection type="marketing" data={dashboardData.marketing} onCardClick={handleMarketingClick} onTitleClick={handleTitleClick} isActive={true}/>;
       case 'tasks':
-        return <UnifiedSection type="tasks" data={dashboardData.tasks} onCardClick={handleTaskClick} />;
+        return <UnifiedSection type="tasks" data={dashboardData.tasks} onCardClick={handleTaskClick} onTitleClick={handleTitleClick} isActive={true}/>;
       case 'claims':
-        return <UnifiedSection type="claims" data={dashboardData.claims} onCardClick={handleClaimClick} />;
+        return <UnifiedSection type="claims" data={dashboardData.claims} onCardClick={handleClaimClick} onTitleClick={handleTitleClick} isActive={true} />;
       default:
         return null;
     }
