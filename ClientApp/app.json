@@ -4,7 +4,8 @@
     "slug": "MGo",
     "version": "1.0.0",
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker"
     ],
     "orientation": "portrait",
     "icon": "./assets/ic_launcher.png",

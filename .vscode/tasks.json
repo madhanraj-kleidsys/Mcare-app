@@ -4,9 +4,9 @@
         {
             "label": "starting app with Bunuuh",
             "type": "shell",
-            "command": "bun expo start --clear",
+            "command": "pnpm exec expo start --reset-cache",
             "options": {
-                "cwd": "${workspaceFolder}/client"
+                "cwd": "${workspaceFolder}/ClientApp"
             },
             "group": "build",
             "presentation": {

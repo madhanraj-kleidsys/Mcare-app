@@ -15,6 +15,7 @@ import LoginScreen1 from './components/loginpages/LoginScreen1';
 import LoginScreen2 from './components/loginpages/LoginScreen2';
 import LoginScreen3 from './components/loginpages/LoginScreen3';
 import MainScreen from './components/MainScreen';
+// import ServiceCallView from './components/those4boxes/servicecalls/ServiceCallView';
 
 const Stack = createStackNavigator();
 
@@ -42,7 +43,10 @@ const RootNavigation = () => {
         {userToken === null ? (
           <Stack.Screen name="Login" component={RandomLoginScreen} />
         ) : (
+          <>
           <Stack.Screen name="Home" component={MainScreen} />
+          {/* <Stack.Screen name="ServiceCallView" component={ServiceCallView} /> */}
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

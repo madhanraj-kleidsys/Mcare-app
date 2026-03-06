@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from '../utils/tokenStorage';
 
-const baseURl = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.117:3000;'
+const baseURl = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.117:3000'
 // Base configuration
 const api = axios.create({
     baseURL: `${baseURl}/api`, 
