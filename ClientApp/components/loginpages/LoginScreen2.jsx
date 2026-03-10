@@ -11,12 +11,14 @@ import {
   Animated,
   Text as RNText
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { TextInput, Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import api from '../../api/axiosClient';
-import {saveTokens, saveUserData} from '../../utils/tokenStorage';
+import { saveTokens, saveUserData } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -68,38 +70,52 @@ export default function LoginScreen() {
 
 
   const handleLogin = async () => {
-    if(!username || !password) {
+    if (!username || !password) {
       alert("Please enter both username and password...");
       return;
     };
-      setIsLoading(true);
+    setIsLoading(true);
     // setTimeout(() => setIsLoading(false), 2000);
     try {
-        const res = await api.post('/auth/login', {
-            email: username,
-            password: password
-        });
-  
-        if (res.data.accessToken) {
-            // 1. Save Tokens securely
-            // await saveTokens(res.data.accessToken, res.data.refreshToken);
-            
-            // // 2. Save User Data (Non-sensitive)
-            // await saveUserData(res.data.user);
+      const res = await api.post('/auth/login', {
+        email: username,
+        password: password
+      });
 
-            await login(
-              res.data.accessToken,
-              res.data.refreshToken,
-              res.data.user
-            )
-            console.log("Login Success!");
-        }
+      if (res.data.accessToken) {
+        // 1. Save Tokens securely
+        // await saveTokens(res.data.accessToken, res.data.refreshToken);
+
+        // // 2. Save User Data (Non-sensitive)
+        // await saveUserData(res.data.user);
+          
+        await login(
+          res.data.accessToken,
+          res.data.refreshToken || null,
+          res.data.user
+        )
+        console.log("Login Success!");
+      }
+      else{
+        alert("Login failed - no token received");
+        throw new Error("No access token received from server");
+      }
     } catch (error) {
-        console.error("Login Failed:", error.response?.data?.message || error.message);
-       const errorMessage = error.response?.data?.message || "Invalid credentials or server error";
-      alert(errorMessage);
+    const errorMessage =
+      error.response?.data?.message ||           // most common case
+      error.response?.data?.error ||             // sometimes it's "error" key
+      error.message ||                           // network error, timeout, etc.
+      "Something went wrong. Please try again.";
+
+    alert(errorMessage);                         // ← shows "Account is inactive"
+    
+    console.error("Login error:", errorMessage, error);
+
+      //   console.error("Login Failed:", error.response?.data?.message || error.message);
+      //  const errorMessage = error || "Invalid credentials or server error";
+      // alert(errorMessage);
     }
-    finally{
+    finally {
       setIsLoading(false);
     }
   }
@@ -225,7 +241,7 @@ export default function LoginScreen() {
               marginBottom: 30,
               textAlign: 'center'
             }}>
-              Please sign in to continue
+              Please sign in to continue 2
             </RNText>
 
             {/* Username */}

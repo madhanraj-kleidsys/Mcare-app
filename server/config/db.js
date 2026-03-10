@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
     host,
     dialect: 'mssql',
     port: Number(process.env.DB_PORT) || 1433,
-    logging:false,
+    logging: false,
     dialectOptions: {
       options: {
         encrypt: false,
@@ -26,14 +26,17 @@ const sequelize = new Sequelize(
   }
 );
 
+const green = "\x1b[32m";
+const reset = "\x1b[0m";
+
 const connectDB = async () => {
-    try{
-        await sequelize.authenticate();
-        console.log('✅ DATABASE CONNECTED');
-    }
-    catch(err){
-        console.error('⚠️ err is db connection:', err);
-    }
+  try {
+    await sequelize.authenticate();
+    console.log(`${green}✅ DATABASE CONNECTED${reset}`);
+  }
+  catch (err) {
+    console.error('⚠️ err is db connection:', err);
+  }
 };
 
 connectDB();

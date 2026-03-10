@@ -20,6 +20,8 @@ import api from '../../api/axiosClient';
 import { saveTokens, saveUserData } from '../../utils/tokenStorage';
 import { useAuth } from '../../context/AuthContext';
 const { width, height } = Dimensions.get('window');
+import Toast from 'react-native-toast-message';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 const theme = {
   ...DefaultTheme,
@@ -84,9 +86,17 @@ export default function LoginScreen() {
         console.log("Login Success!");
       }
     } catch (error) {
-      console.error("Login Failed:", error.response?.data?.message || error.message);
-      const errorMessage = error.response?.data?.message || "Invalid credentials or server error";
-      alert(errorMessage);
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        error.message || 
+        "Login failed. Please try again.";
+
+    alert(errorMessage);
+    console.error("Login error:", errorMessage, error);
+      // console.error("Login Failed:", error.response?.data?.message || error.message);
+      // const errorMessage = error.response?.data?.message || "Invalid credentials or server error";
+      // alert(errorMessage);
     }
     finally {
       setIsLoading(false);
@@ -129,7 +139,7 @@ export default function LoginScreen() {
                   />
                 </View>
                 <RNText style={styles.logoText}>
-                  GA Morgan Dynamics
+                  GA Morgan Dynamics 3
                 </RNText>
               </Animated.View>
 

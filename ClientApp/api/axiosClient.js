@@ -4,7 +4,7 @@ import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from '../uti
 const baseURl = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.117:3000'
 // Base configuration
 const api = axios.create({
-    baseURL: `${baseURl}/api`, 
+    baseURL: `${baseURl}/api`,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -28,13 +28,45 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        const skipRefreshUrls = [
+            '/auth/login',
+            '/auth/refresh'
+        ];
+
+        const isAuthEndpoint = skipRefreshUrls.some(url => 
+            originalRequest.url?.includes(url)
+        );
+
+        if (isAuthEndpoint) {
+            // For login/refresh endpoints → just pass the error through (no refresh attempt)
+            return Promise.reject(error);
+        }
+
+        // ── NEW: Check if this is "account inactive" case ──
+        if (error.response?.data?.inactive === true ||
+            error.response?.data?.message?.toLowerCase().includes("inactive")) {
+            // Do NOT try to refresh - just reject with original error
+            return Promise.reject(error);
+        }
+
+
         // If error is 403/401 and we haven't tried refreshing yet
         if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
             originalRequest._retry = true; // Mark as retried so we don't loop forever
 
-            try {
-                const refreshToken = await getRefreshToken();
-                if (!refreshToken) throw new Error("No refresh token");
+            const refreshToken = await getRefreshToken();
+
+
+                        if (!refreshToken) {
+                    console.warn("No refresh token available → forcing logout");
+                    await clearTokens();
+                    Alert.alert("Session Expired", "Please log in again.");
+                    return Promise.reject(new Error("Session expired - please log in again"));
+                  }
+
+                try {
+                    // const refreshToken = await getRefreshToken();
+                // if (!refreshToken) throw new Error("No refresh token");
 
                 // Call the Refresh Endpoint
                 const res = await axios.post(`${baseURl}/api/auth/refresh`, {
@@ -47,7 +79,7 @@ api.interceptors.response.use(
 
                     // Update the header for the failed request
                     originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
-                    
+
                     // Retry the original request
                     return api(originalRequest);
                 }

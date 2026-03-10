@@ -41,10 +41,13 @@ exports.login = async (req, res) => {
         const user = users[0]; // Get the first user from the array
 
         if (!user.IsActive) {
-            return res.status(403).json({ message: "Account is inactive" });
+            return res.status(423).json({
+         message: "Account is inactive : Login not allowed ..!!",
+         code: "ACCOUNT_INACTIVE"
+             });
         }
 
-        // Generate Tokens
+        // Generate Tokens 30m
         const payload = {
             id: user.ID,
             username: user.UserName,
@@ -52,7 +55,7 @@ exports.login = async (req, res) => {
             company_id: user.CompanyID
         };
 
-        const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30m" });
+        const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: "7d" });
         const refreshToken = jwt.sign({ id: user.ID }, REFRESH_SECRET, { expiresIn: "7d" });
 
         res.json({ 
@@ -95,8 +98,8 @@ exports.refresh = async (req, res) => {
                 // you might need to query DB again here to get fresh data.
             };
 
-            // Re-issue Access Token
-            const newAccessToken = jwt.sign(newPayload, ACCESS_SECRET, { expiresIn: '30m' });
+            // Re-issue Access Token  30m   
+            const newAccessToken = jwt.sign(newPayload, ACCESS_SECRET, { expiresIn: '7d' });
             
             // Re-issue Refresh Token (Rotation)
             const newRefreshToken = jwt.sign({ id: decoded.id }, REFRESH_SECRET, { expiresIn: '7d' });
