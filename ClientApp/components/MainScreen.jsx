@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Dashboard from './dashboard/homePage.jsx';
+import CalendarHub from './calendar/CalendarHub.jsx';
+import CalendarScreen from './calendar/CalendarScreen.jsx';
+import DayDetailScreen from './calendar/DayDetailScreen.jsx';
+import AttendanceScreen from './attendance/AttendanceScreen.jsx';
+import AttendanceView from './attendance/AttendanceView.jsx';
+
 import ProfileScreen from './ProfileScreen.jsx';
 import Dock from './dockNav.jsx';
 import NotificationScreen from './NotificationScreen.jsx';
