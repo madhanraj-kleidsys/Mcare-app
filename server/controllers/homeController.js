@@ -176,7 +176,9 @@ const getDashboardData = async (req, res) => {
         results.ButtonRights.forEach(r => output.push({...r, StreamType: "LINEAR", StreamName: "", FreshOrAged: "FRESH"}));
 
         // Add User Data (Code, IsAdmin)
-        output.push({ Code: currentUser.Code, IsAdmin: currentUser.IsAdmin, ID: currentUser.ID, StreamType: "LINEAR", StreamName: "", FreshOrAged: "FRESH" });
+        output.push({ Code: currentUser.Code, 
+            IsAdmin: currentUser.IsAdmin || 0,
+             ID: currentUser.ID, StreamType: "LINEAR", StreamName: "", FreshOrAged: "FRESH" });
 
         res.json(output);
 
