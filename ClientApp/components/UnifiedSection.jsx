@@ -49,7 +49,7 @@ const StatCard = ({ title, count, icon, delay = 0 }) => {
   );
 };
 
-const UnifiedSection = ({ type, data, onCardClick }) => {
+const UnifiedSection = ({ type, data, onCardClick, onTitleClick, isActive }) => {
 
   // Config for each section type
   const sectionConfig = {
@@ -81,20 +81,31 @@ const UnifiedSection = ({ type, data, onCardClick }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: config.color }]}>
+      <TouchableOpacity style={[styles.header, { backgroundColor: config.color }]}
+      onPress={() => onTitleClick(type)}>
         <MaterialCommunityIcons name={config.icon} size={24} color="#fff" />
         <Text style={styles.headerTitle}>{config.title}</Text>
-      </View>
+
+        {isActive && (
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <MaterialCommunityIcons name="close" size={20} color="#fff" />
+          </View>
+        )}
+      </TouchableOpacity>
 
       {/* Cards Grid */}
       <View style={styles.cardsContainer}>
         <View style={styles.cardsGrid}>
           {data.map((item, index) => (
             <TouchableOpacity
-              key={index} onPress={() => onCardClick(item.title)}
-              activeOpacity={0.8}
+              key={index}
+              onPress={() => !item.disabled && onCardClick(item.title)}
+              // item.disabled ? 1 : 
+              activeOpacity={0.9}
             >
-              <StatCard {...item} delay={index * 100} />
+              <View style={{ opacity: item.disabled ? 0.9 : 1}}>
+                <StatCard {...item} delay={index * 100} />
+              </View>
             </TouchableOpacity>
           ))}
         </View>

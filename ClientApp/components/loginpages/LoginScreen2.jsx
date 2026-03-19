@@ -94,8 +94,7 @@ export default function LoginScreen() {
           res.data.refreshToken || null,
           res.data.user
         )
-        console.log("Login Success!");
-      }
+    }
       else{
         alert("Login failed - no token received");
         throw new Error("No access token received from server");

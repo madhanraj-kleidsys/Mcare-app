@@ -4,6 +4,9 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/authMiddleware');
 const { getServiceRequests } = require('../controllers/serviceRequestController');
 
-router.get('/registered', authenticateToken, getServiceRequests);
+const { getServiceCallView } = require('../controllers/serviceCallViewController');
+
+router.get('/calls', authenticateToken, getServiceRequests);
+router.get('/callview/:servReqID', authenticateToken, getServiceCallView);
 
 module.exports = router;
