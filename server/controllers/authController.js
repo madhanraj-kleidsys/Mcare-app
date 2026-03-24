@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
                 [CompanyID], [BUID]
             FROM [GAMD].[dbo].[CrmUsers]
             WHERE (Code = :LoginId OR UserName = :LoginId) 
-            AND Password = :Password
+            AND Password = :Password    
         `, {
             replacements: { LoginId: email, Password: password },
             type: QueryTypes.SELECT
@@ -51,6 +51,8 @@ exports.login = async (req, res) => {
         const payload = {
             id: user.ID,
             username: user.UserName,
+            name: user.Name,
+            code: user.Code,
             role: user.UserType,
             company_id: user.CompanyID
         };
@@ -62,11 +64,11 @@ exports.login = async (req, res) => {
             message: "Login successful", 
             accessToken, 
             refreshToken, 
-            user 
+            user
         });
 
     } catch (err) {
-        console.error('Login Error:', err);
+        console.error('Login Error auth:', err);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -93,7 +95,10 @@ exports.refresh = async (req, res) => {
             // For speed/statelessness, we re-sign using the decoded ID.
             
             const newPayload = { 
-                id: decoded.id, 
+                id: decoded.id,
+                // code: user.Code,
+                // role: user.UserType,
+                // company_id: user.CompanyID
                 // Note: If you need roles/username in access token, 
                 // you might need to query DB again here to get fresh data.
             };
