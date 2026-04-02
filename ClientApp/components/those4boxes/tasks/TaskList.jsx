@@ -7,8 +7,9 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
+  // SafeAreaView,
 } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../../api/axiosClient';
@@ -41,10 +42,10 @@ const STATUS_THEMES = {
   },
 };
 
-export default function TaskListScreen({ status = 'Registered', onBack }) {
-//  route, navigation
+export default function TaskListScreen({ status, onBack, onViewDetail }) {
+  //  route, navigation
   // const { status = 'Registered' } = route.params || {}; // passed from parent / tab
-const navigation = useNavigation();
+  const navigation = useNavigation();
   const theme = STATUS_THEMES[status] || STATUS_THEMES.Registered;
 
   const [loading, setLoading] = useState(false);
@@ -84,12 +85,15 @@ const navigation = useNavigation();
 
   const renderCard = ({ item }) => {
     const taskStatus = item.DocStatus || 'REGISTERED';
+    // console.log(item.DocStatus);
 
     // You can override accent per card if you want multi-status view later
     const cardStripColor = STATUS_THEMES[taskStatus]?.strip || '#95a5a6';
-
+    // console.error(' item.ID Card:', item.ID, ',,,,,,, Status:', taskStatus);
     return (
-      <TouchableOpacity style={styles.card} activeOpacity={0.88}>
+      <TouchableOpacity style={styles.card} activeOpacity={0.88}
+        onPress={() => onViewDetail(item.ID)}>
+
         <View style={[styles.cardStrip, { backgroundColor: cardStripColor }]} />
 
         <View style={styles.cardContent}>
@@ -101,10 +105,10 @@ const navigation = useNavigation();
             <Text style={styles.cardDate}>
               {item.DocDate
                 ? new Date(item.DocDate).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
                 : '—'}
             </Text>
           </View>
@@ -114,8 +118,26 @@ const navigation = useNavigation();
             {item.CategoryName || 'No Category'}
           </Text>
 
+          {/* <View style={styles.detailsRow}>
+            <MaterialCommunityIcons name="account-circle-outline" size={16} color={theme.accent} />
+            <Text style={styles.userText}>
+              {taskStatus === 'ASSIGNED'
+                ? `Created: ${item.CreatedBy || '—'}`
+                : `Assigned: ${item.AssignedUserName || item.AssignedUserID || 'Unassigned'}`}
+            </Text>
+          </View> */}
+
+          <View style={styles.detailsRow}>
+            <MaterialCommunityIcons name="account-circle-outline" size={16} color={theme.accent} />
+            <Text style={styles.userText}>
+              {taskStatus === 'COMPLETED' || taskStatus === 'CLOSED' || taskStatus === 'ASSIGNED'
+                ? `Created: ${item.CreatedBy || 'Name Not Found'}  - ${item.ScheduleDateTime || 'No Schedule'}`
+                : `Assigned: ${item.AssignedUserName || item.AssignedUserID || 'Unassigned'}`}
+            </Text>
+          </View>
+
           {/* Description / Comments */}
-          <Text style={styles.description} numberOfLines={2}>
+          <Text style={styles.description} numberOfLines={3}>
             {item.Comments || item.Description || 'No details provided'}
           </Text>
 
@@ -130,14 +152,15 @@ const navigation = useNavigation();
           </View>
 
           {/* Target / Schedule date */}
-          {item.ScheduleDateTime || item.TargetDateTime ? (
+          {/* Target: {new Date(item.TargetDateTime || 'no  target date').toLocaleDateString()} */}
+          {/* {item.ScheduleDateTime || item.TargetDateTime ? (
             <View style={styles.detailsRow}>
               <MaterialCommunityIcons name="calendar-clock-outline" size={16} color="#666" />
               <Text style={styles.dateText}>
-                Target: {new Date(item.ScheduleDateTime || item.TargetDateTime).toLocaleDateString()}
+                Target: {item.TargetDateTime || 'no target date'}
               </Text>
             </View>
-          ) : null}
+          ) : null} */}
 
           {/* Footer tags / status pill */}
           <View style={styles.statusPillContainer}>
@@ -158,36 +181,37 @@ const navigation = useNavigation();
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.bgLight }]}>
+    <SafeAreaProvider style={[styles.container, { backgroundColor: theme.bgLight }]}>
       {/* Header / Search */}
-      <View style={styles.header}>
+      <View style={styles.unifiedHeader}>
+        {/* <View style={styles.header}> */}
         {/* <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}> */}
-         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtnRow}>
           <MaterialCommunityIcons name="arrow-left" size={26} color="#333" />
         </TouchableOpacity>
 
         {/* <Text style={styles.screenTitle}>{theme.title}</Text> */}
 
-        <View style={styles.placeholder} />
-      </View>
+        {/* <View style={styles.placeholder} /> */}
+        {/* </View> */}
 
-      {/* Search bar */}
-      <View style={styles.searchContainer}>
-        <MaterialCommunityIcons name="magnify" size={20} color="#888" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={`Search ${status.toLowerCase()} tasks...`}
-          value={searchText}
-          onChangeText={setSearchText}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-          autoCapitalize="none"
-        />
-        {searchText.length > 0 && (
-          <TouchableOpacity onPress={() => { setSearchText(''); fetchTasks(''); }}>
-            <MaterialCommunityIcons name="close-circle" size={20} color="#999" />
-          </TouchableOpacity>
-        )}
+        {/* Search bar */}
+        <View style={styles.searchBoxRow}>
+          <MaterialCommunityIcons name="magnify" size={20} color="#888" />
+          <TextInput
+            style={styles.searchInputRow}
+            placeholder={`Search ${status}...`}
+            value={searchText}
+            onChangeText={setSearchText}
+            onSubmitEditing={handleSearch}
+            returnKeyType="search"
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => { setSearchText(''); fetchTasks(''); }}>
+              <MaterialCommunityIcons name="close-circle" size={20} color="#ed1a3b" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* List */}
@@ -217,12 +241,53 @@ const navigation = useNavigation();
       >
         <MaterialCommunityIcons name="plus" size={28} color="#fff" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  unifiedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    gap: 10, // Space between back button and search bar
+  },
+  backBtnRow: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 2, // Matches your Service Call button look
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  searchBoxRow: {
+    flex: 1, // This makes it fill the rest of the row
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  searchInputRow: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 15,
+    color: '#333',
+  },
+
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,7 +313,7 @@ const styles = StyleSheet.create({
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 15 },
-  listContent: { paddingHorizontal: 16, paddingBottom: 90 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 120 },
   card: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -290,7 +355,7 @@ const styles = StyleSheet.create({
   emptyText: { marginTop: 16, fontSize: 16, color: '#aaa' },
   fab: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 130,
     right: 24,
     width: 56,
     height: 56,

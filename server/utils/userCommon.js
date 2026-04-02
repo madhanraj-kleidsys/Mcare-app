@@ -27,7 +27,7 @@ const getUserHierarchy = async (userId) => {
 
     const startSeq = parseInt(UserSeq) || 0;
     const maxSeq = parseInt(maxSeqResult[0]?.MaxSeq) || startSeq;
-    
+
     // 3. Build Array and join (Safe math loop)
     let hierarchyArray = [];
     for (let i = startSeq; i <= maxSeq; i++) {
@@ -62,23 +62,65 @@ const getUserZoneID = async (userId) => {
 
 // Helper 3: Get Reporting Team
 const getAssignedUserNames = async (userId) => {
-    try {
-        const teamQry = await sequelize.query(`
+  try {
+    const teamQry = await sequelize.query(`
             SELECT Name FROM CrmUsers WHERE ReportToUserID = :UserID AND IsActive = 1
         `, { replacements: { UserID: userId }, type: QueryTypes.SELECT });
-        
-        return teamQry.map(row => `'${row.Name.replace(/'/g, "''")}'`);
-    } catch (err) {
-        return [];
-    }
+
+    return teamQry.map(row => `'${row.Name.replace(/'/g, "''")}'`);
+  } catch (err) {
+    return [];
+  }
 };
 
-// Helper 4: Get User Time
-const getUserTime = (offsetMinutes = 0) => {
-    if (offsetMinutes !== 0) {
-        return moment().utc().add(offsetMinutes, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+
+const getUserTime = (session = {}) => {
+  let hourVal = 0;
+  let minVal = 0;
+
+  // ---- Company TZ ----
+  if (session.CompanyTZOffset) {
+    const [h, m] = session.CompanyTZOffset.split(':');
+
+    if (session.CompanyTZSymbol === 'P') {
+      hourVal = parseInt(h);
+      minVal = parseInt(m);
+    } else if (session.CompanyTZSymbol === 'M') {
+      hourVal = -parseInt(h);
+      minVal = -parseInt(m);
     }
-    return moment().format('YYYY-MM-DD HH:mm:ss');
+  }
+
+  // ---- BU TZ (overrides Company) ----
+  if (session.BUTZOffset) {
+    const [h, m] = session.BUTZOffset.split(':');
+
+    if (session.BUTZSymbol === 'P') {
+      hourVal = parseInt(h);
+      minVal = parseInt(m);
+    } else if (session.BUTZSymbol === 'M') {
+      hourVal = -parseInt(h);
+      minVal = -parseInt(m);
+    }
+  }
+
+  let dateTime = moment(); // local time (matches PHP)
+
+  dateTime = dateTime.add(minVal, 'minutes').add(hourVal, 'hours');
+
+  // match PHP format: Y-m-d H:i:s:000
+  return dateTime.format('YYYY-MM-DD HH:mm:ss') + ':000';
 };
+
 
 module.exports = { getUserHierarchy, getUserZoneID, getAssignedUserNames, getUserTime };
+
+
+
+// Helper 4: Get User Time
+// const getUserTime = (offsetMinutes = 0) => {
+//     if (offsetMinutes !== 0) {
+//         return moment().utc().add(offsetMinutes, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+//     }
+//     return moment().format('YYYY-MM-DD HH:mm:ss');
+// };

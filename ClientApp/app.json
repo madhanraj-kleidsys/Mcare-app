@@ -8,7 +8,8 @@
       "@react-native-community/datetimepicker"
     ],
     "orientation": "portrait",
-    "icon": "./assets/ic_launcher.png",
+    "icon": "./assets/androidstudio.png",
+    // "icon": "./assets/ic_launcher.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "androidNavigationBar": {
